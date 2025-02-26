@@ -1,0 +1,32 @@
+Here are the example plugins that I have created for you to try out and see how they work.
+To help you better understand the purpose, here is the line of thinking that I had:
+- Plugins are a way to create a community and to share the things that you have made.
+- It's easier to create a plugin for something than it is to create something from scratch
+- Having all of your tools in one place is incredibly convenient (if you do any scripting, using
+	Back SEO to host the GUI for your script will be incredibly useful)
+
+How do plugins work:
+- The plugins folder is scanned for any file starting with back_ and ending with .py. 
+- If it sees a .pyd it will attempt to load that as well
+- Upon loading, it creates the menu, tab, and window (in that order) to get everything loaded
+  into memory. Do note that the plugin will not yet be activated yet (by default), the UI will just be loaded
+- User clicks on Plugins->whateverplugin, then it gets activated (Window shows, tab appears, menu comes up)
+- Pressing Scroll Lock will reload all plugins (very helpful for developing plugins)
+- Reloading the plugin makes it so that you don't have to restart the program every time you run.
+- NOTE: You can crash the application. Shouldn't be a big deal, but it happens.
+- NOTE: I am not responsible for what you create, if it breaks your PC, that's on YOU.
+- NOTE: I am not responsible for plugins that you download outside of BackSEO. You have been warned. 
+
+What's up with .pyd files?
+So, if you don't know, Python is an interpreted language. It is slower than a compiled language. However,
+you can create .pyd extension files (basically just a regular .dll) that are faster than python. These 
+extension modules are written in C/C++ (assuming you use/are familiar with CPython, which is standard).
+However, there is a way to convert normal Python code into compiled C/C++ code... Using Cython! (Or Nuitka)
+To see why you would want to use compiled plugins, load up the back_Speedy_Uncompiled.py plugin, and click
+the button. The program freezes for about 5 minutes while it does 10,000,000 prime number calculations
+Then load up the Speedy_Compiled plugin and click the button. The program freezes for about 5 seconds running
+the same amount of calculations. You'll likely notice a frame rate drop, but it goes away when you switch tabs.
+
+Okay, that's cool Andrew, but how do I access Back SEO data and functions?
+Great question... You don't. Most Back SEO functions are completely separate from each other, so I can't justify
+creating a way to interact with the core program quite yet. An extension for this will likely be made in the future.

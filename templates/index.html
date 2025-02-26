@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agency Reports</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>{{ agency.company_name }}</h1>
+    </header>
+
+    <main>
+        <section id="clientSelection">
+            <h2>Select a Client</h2>
+            <select id="clientSelector">
+                <option value=" " selected> </option>
+                {% for client in agency.clientList %}
+                    <option value="{{ client }}">{{ client }}</option>
+                {% endfor %}
+            </select>
+        </section>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var clientSelector = document.getElementById('clientSelector');
+                clientSelector.addEventListener('change', function() {
+                    var selectedClient = this.value;
+                    
+                    fetch('/update_client', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            selectedClient: selectedClient
+                        })
+                    })
+                    .then(function(response) {
+                        if (response.ok) {
+                            fetch('/get_reports', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    selectedClient: selectedClient
+                                })
+                            })
+                            .then(function(response) {
+                                return response.json();
+                            })
+                            .then(function(data) {
+                                var reportListItems = document.getElementById('reportListItems');
+                                reportListItems.innerHTML = '';
+                                
+                                data.reports.forEach(function(report) {
+                                    var listItem = document.createElement('li');
+                                    var link = document.createElement('a');
+                                    link.href = '/download_report?filename=' + encodeURIComponent(report.fileName) + '&path=' + encodeURIComponent(report.path);
+                                    link.target = '_blank';
+                                    link.textContent = report.fileName;
+                                    listItem.appendChild(link);
+                                    reportListItems.appendChild(listItem);
+                                });
+                            });
+                        }
+                    });
+                });
+            });
+        </script>
+        <section id="reportOptions">
+            <h2>Report Options</h2>
+            <label for="checkTargetKeywords">
+                <input type="checkbox" id="checkTargetKeywords">
+                Target Keywords (Search, No location included)
+            </label>
+            
+            <label for="checkTargetLocations">
+                <input type="checkbox" id="checkTargetLocations">
+                Target Keywords (Search, Location Included)
+            </label>
+            
+            <label for="checkTargetMaps1">
+                <input type="checkbox" id="checkTargetMaps1">
+                Target Keywords (Maps, 1mi)
+            </label>
+            
+            <label for="checkTargetMaps2">
+                <input type="checkbox" id="checkTargetMaps2">
+                Target Keywords (Maps, 2mi)
+            </label>
+            
+            <label for="checkTargetMaps5">
+                <input type="checkbox" id="checkTargetMaps5">
+                Target Keywords (Maps, 5mi)
+            </label>
+            
+            <label for="checkTargetMaps15">
+                <input type="checkbox" id="checkTargetMaps15">
+                Target Keywords (Maps, 15mi)
+            </label>
+            
+            <label for="checkTargetMaps25">
+                <input type="checkbox" id="checkTargetMaps25">
+                Target Keywords (Maps, 25mi)
+            </label>
+            
+            <label for="checkTargetMaps50">
+                <input type="checkbox" id="checkTargetMaps50">
+                Target Keywords (Maps, 50mi)
+            </label>
+            
+            <label for="checkWebsiteAudit">
+                <input type="checkbox" id="checkWebsiteAudit">
+                Website Audit
+            </label>
+            
+            <label for="proxyBox">Proxy:</label>
+            <input type="text" id="proxyBox">
+            
+            <button id="addReportAutomation">Add to Report Automation</button>
+            <button id="startReports">Start Generating Reports</button>
+        </section>
+
+        <section id="reportList">
+            <h2>Available Reports</h2>
+            <ul id="reportListItems">
+                {% for report in currentReports %}
+                    <li><a href="{{ report.path }}">{{ report.fileName }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    var checkboxId = this.id;
+                    var isChecked = this.checked;
+                    
+                    fetch('/update_checkbox', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            checkboxId: checkboxId,
+                            isChecked: isChecked
+                        })
+                    });
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var addReportAutomationBtn = document.getElementById('addReportAutomation');
+            addReportAutomationBtn.addEventListener('click', function() {
+                fetch('/generate_report', {
+                    method: 'POST'
+                });
+            });
+            
+            var startReportsBtn = document.getElementById('startReports');
+            startReportsBtn.addEventListener('click', function() {
+                fetch('/start_reports', {
+                    method: 'POST'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
