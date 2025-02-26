@@ -32,7 +32,7 @@ COLORS = {
 }
 def pullPixa(search_term, api_key):
     # Build the URL
-    #api_key = '26600516-a92ee994e0de48bd69432e951'
+    #api_key = None
     url = f'https://pixabay.com/api/?key={api_key}&q={search_term}&image_type=photo&per_page=200'
 
     # Make the request
@@ -195,7 +195,7 @@ class WrittenImage():
         self.background = self.write_image(
             self.background, self.color, self.text1, self.text2, foreground=self.fgPath)
         self.background.save(f'output/images/{cleanFilename(self.img_name)}')
-#seoImage('dog', "This Dog", "26600516-a92ee994e0de48bd69432e951")
+#seoImage('dog', "This Dog", "261")
 
 def __init__():
     pass
