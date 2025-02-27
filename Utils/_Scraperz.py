@@ -25,6 +25,7 @@ from threading import Thread
 import csv
 from playwright.sync_api import sync_playwright, Browser
 from urllib.parse import urlencode, quote_plus
+from collections import OrderedDict
 
 def init_Scraperz(name) -> Any:
     try:
@@ -33,6 +34,15 @@ def init_Scraperz(name) -> Any:
         suffix: Any = b"U_" + name.encode("punycode").replace(b"-", b"_")
     return b"PyInit" + suffix
 
+def flatten_dict(d, parent_key='', sep='_'):
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 class CustomThread(Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}) -> None:
@@ -401,13 +411,17 @@ class PageAudit:
             tokenized_art = sent_tokenize(self.article)
             
             readability_scored = textstat(tokenized_art)
+            flattened_readability_scored = flatten_dict(readability_scored)
+            readability_score = flattened_readability_scored.get('readability grades_Coleman-Liau')
+            self.grade_level = readability_score
+            self.stats = flattened_readability_scored
             #readability_scored.get('Coleman-Liau')
             #print(readability_scored)
-            readability_score = readability_scored.get('Coleman-Liau')
-            #print(readability_score)
-            self.grade_level = readability_scored.get('Coleman-Liau')
-            #print(self.grade_level)
-            self.stats = dict(readability_scored)
+            # readability_score = readability_scored.get('readability grades').get('Coleman-Liau')
+            # #print(readability_score)
+            # self.grade_level = readability_scored.get('readability grades').get('Coleman-Liau')
+            # #print(self.grade_level)
+            # self.stats = dict(readability_scored.get())
             return readability_score
         except:
             self.errors.append("readability_score")
@@ -470,8 +484,8 @@ class PageAudit:
                     else:
                         linkPage = linkURL
                 if linkPage not in inboundLinks:
-                    inboundLinks[linkPage]: Dict[str, List[str]] = dict()
-                    inboundLinks[linkPage]["linkText"]: List[str] = list()
+                    inboundLinks[linkPage] = dict()
+                    inboundLinks[linkPage]["linkText"] = list()
                 inboundLinks[linkPage]["linkText"].append(linkText)
             return inboundLinks
         except:
@@ -506,11 +520,11 @@ class PageAudit:
                 else:
                     linkDomain: str = str(linkURL).split("http://")[1].split("/")[0]
                 if linkDomain not in outbound_links:
-                    outbound_links[linkDomain]: dict = dict()
+                    outbound_links[linkDomain] = dict()
                     outbound_links[linkDomain]["count"] = 0
-                    outbound_links[linkDomain]["linkText"]: List[str] = list()
-                    outbound_links[linkDomain]["pages"]: List[str] = list()
-                    outbound_links[linkDomain]["data"]: List[Dict[str, str]] = list()
+                    outbound_links[linkDomain]["linkText"] = list()
+                    outbound_links[linkDomain]["pages"] = list()
+                    outbound_links[linkDomain]["data"] = list()
                 outbound_links[linkDomain]["linkText"].append(linkText)
                 outbound_links[linkDomain]["count"] += 1
                 outbound_links[linkDomain]["pages"].append(linkURL)
@@ -957,7 +971,7 @@ class GoogleResults:
                         "--disable-accelerated-2d-canvas",
                     ],            
                 )
-                context = browser.new_context()
+                context = browser.new_context(user_agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:135.0) Gecko/20100101 Firefox/135.0")
                 page = context.new_page()
                 params = {"q": self.query, "num": self.numResults}
                 url = 'https://google.com/search?' + urlencode(params, quote_via=quote_plus)
