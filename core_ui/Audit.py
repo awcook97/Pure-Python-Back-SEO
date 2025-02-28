@@ -255,7 +255,7 @@ class CoreAudit(Core_UI):
                 ) as self.searchurlgroup:
                     dpg.add_text("Sitemap: ")
                     self.auditinput: int | str = dpg.add_input_text(
-                        default_value="https://backseo.org/sitemap.xml",
+                        default_value="https://axel.llc/sitemap.xml",
                         hint="https://yoursite.com/sitemap.xml",
                         width=300,
                         callback=self.startAudit,

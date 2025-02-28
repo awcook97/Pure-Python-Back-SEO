@@ -7,16 +7,8 @@ import multiprocessing
 import os
 
 try:
-    # from Utils.PageAudit import PageAudit, CompareAudit
-    # from Utils._Rake import _Rake
-    # from Utils._mFastURLs import mgetResp
     from Utils._Scraperz import GoogleResults, PageAudit, CompareAudit
-
-    # from Utils._textstat import textstat
-except:
-    # from PageAudit import PageAudit, CompareAudit
-    # from _mFastURLs import mgetResp
-    # from _Rake import _Rake
+except Exception:
     from _Scraperz import GoogleResults
 from threading import Thread
 import pickle
@@ -24,8 +16,6 @@ from typing import Any, Dict, Literal
 import certifi
 import dearpygui.dearpygui as dpg
 import time
-
-# from BackSEODataHandler import getBackSEODataHandler
 from multiprocessing.pool import Pool
 from BackSEODataHandler import getBackSEODataHandler
 
@@ -818,41 +808,6 @@ def getAudit() -> dict:
                 if len(data):
                     auditData[searchTerm] = data
     return auditData
-
-
-# def get_article_keywords(article: str) -> list:
-#     try:
-#         myRake = _Rake(
-#             include_repeated_phrases=False, max_length=7, min_length=2, ranking_metric=0
-#         )
-#         myRake2 = _Rake(
-#             include_repeated_phrases=False, max_length=7, min_length=2, ranking_metric=1
-#         )
-#         myRake3 = _Rake(
-#             include_repeated_phrases=False, max_length=7, min_length=2, ranking_metric=2
-#         )
-#         myL = list()
-#         myRake.extract_keywords_from_text(article)
-#         myRake2.extract_keywords_from_text(article)
-#         myRake3.extract_keywords_from_text(article)
-#         myL.extend(myRake.get_ranked_phrases())
-#         myL.extend(myRake2.get_ranked_phrases())
-#         myL.extend(myRake3.get_ranked_phrases())
-#         return list(set(myL))
-#     except:
-#         return list()
-
-
-# def get_keyword_count(article: str) -> list:
-#     try:
-#         article_keywords = get_article_keywords(article=article)
-#         keyword_count = list()
-#         for keyw in list(set(article_keywords)):
-#             if article.lower().count(keyw) > 1:
-#                 keyword_count.append((keyw, article.lower().count(keyw)))
-#         return keyword_count
-#     except:
-#         return list()
 
 
 def load_dpg_img(img_path: str, registry: int | str) -> int | str:
