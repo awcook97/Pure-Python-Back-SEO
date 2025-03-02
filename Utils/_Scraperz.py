@@ -1,23 +1,21 @@
 import urllib3
 from urllib.parse import urlparse
-import re
-import lxml
-from bs4 import BeautifulSoup as bs, NavigableString, Tag
+
+from bs4 import BeautifulSoup, NavigableString, Tag
 from multiprocessing import pool, freeze_support
-from bs4 import BeautifulSoup
-import regex
+
+
 import functools
 from nltk.tokenize import sent_tokenize
 try:
     from Utils._Rake import _Rake
     from Utils._textstat import textstat
-except:
+except Exception:
     from _Rake import _Rake
     from _textstat import textstat
 import json
 import json.decoder
 from typing import Dict, List, Any, Literal
-import time
 import asyncio
 import aiohttp
 from multiprocessing.pool import ThreadPool as ThreadPoolExecutor
@@ -26,6 +24,7 @@ import csv
 from playwright.sync_api import sync_playwright, Browser
 from urllib.parse import urlencode, quote_plus
 
+
 def init_Scraperz(name) -> Any:
     try:
         suffix: Any = b"_" + name.encode("ascii")
@@ -33,6 +32,15 @@ def init_Scraperz(name) -> Any:
         suffix: Any = b"U_" + name.encode("punycode").replace(b"-", b"_")
     return b"PyInit" + suffix
 
+def flatten_dict(d, parent_key='', sep='_'):
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 class CustomThread(Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}) -> None:
@@ -73,7 +81,7 @@ def getPage(url: str, proxy: str = "") -> tuple:
             )
             # testiez = http.request("GET", "https://api.ipify.org?format=json")
             # print(testiez.data.decode("utf-8"))
-        except:
+        except Exception:
             http = urllib3.PoolManager(headers=headers)
     else:
         http = urllib3.PoolManager(headers=headers)
@@ -89,7 +97,7 @@ def getPage(url: str, proxy: str = "") -> tuple:
 def parsePage(
     response: urllib3.BaseHTTPResponse,
 ) -> tuple[Literal["sitemap"], list] | tuple[Literal["url"], list]:
-    sxml = bs(response.data, "xml")
+    sxml = BeautifulSoup(response.data, "xml")
     psml = list()
     if len(sxml.find_all("sitemap")):
         for page in sxml.find_all("sitemap"):
@@ -114,11 +122,11 @@ async def getSesh(url: str, proxy: str, sesh: aiohttp.ClientSession) -> tuple[st
 
 
 async def agetResponses(urls: List[str], proxy: str, baseURL=None) -> dict:
-    headers: dict[str, str] = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-    }
+    # headers: dict[str, str] = {
+    #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    # }
     res = dict()
-    conn = aiohttp.TCPConnector(limit=0, limit_per_host=0)
+    #conn = aiohttp.TCPConnector(limit=0, limit_per_host=0)
     async with aiohttp.ClientSession(
         baseURL,
         timeout=aiohttp.ClientTimeout(60.0, 30.0),
@@ -222,7 +230,7 @@ class PageAudit:
         if len(self.main_keyword) < 2:
             try:
                 self.main_keyword = self.keyword_count[0]["Keyword"]
-            except:
+            except Exception:
                 self.main_keyword = ""
         delattr(self, "soup")
 
@@ -247,11 +255,11 @@ class PageAudit:
         outJson["Number of Outbound Links"] = len(self.outbound_links)
         try:
             outJson["Meta Description Length"] = len(self.meta_tags["description"])
-        except:
+        except Exception:
             outJson["Meta Description Length"] = 0
         outJson["Meta:Twitter"] = "twitter:card" in self.meta_tags
         outJson["Readability"] = self.readability_score
-        outJson["Schema"] = not "schema" in self.errors
+        outJson["Schema"] = "schema" not in self.errors
         outJson["URL"] = self.url
         return outJson
 
@@ -260,14 +268,14 @@ class PageAudit:
             return json.loads(
                 self.soup.find("script", attrs={"type": "application/ld+json"}).text
             )
-        except:
+        except Exception:
             self.errors.append("schema")
             return {}
 
     def getTitle(self) -> str:
         try:
             return self.soup.title.text
-        except:
+        except Exception:
             self.errors.append("title")
             return ""
 
@@ -293,7 +301,7 @@ class PageAudit:
             else:
                 article = str(self.soup.get_text("\n", strip=False))
             return article
-        except:
+        except Exception:
             self.errors.append("article")
             return ""
 
@@ -307,7 +315,7 @@ class PageAudit:
             for img in self.soup.find_all("img", src=True, alt=True):
                 imgsWAlt.append({img.get("src"): img.get("alt")})
             return imgsWAlt
-        except:
+        except Exception:
             self.errors.append("images")
             return list()
 
@@ -318,7 +326,7 @@ class PageAudit:
                 for tag in self.soup.find_all("meta", attrs={"name": True})
             }
             return meta_tags
-        except:
+        except Exception:
             self.errors.append("meta_tags")
             return dict()
 
@@ -335,7 +343,7 @@ class PageAudit:
                         f"{' '.join(heading.get_text().strip().split())}"
                     )
             return article_outline
-        except:
+        except Exception:
             self.errors.append("article_outline")
             return list()
 
@@ -343,7 +351,7 @@ class PageAudit:
         try:
             self.length = self.article.count(" ")
             return self.length
-        except:
+        except Exception:
             self.errors.append("length")
             return 0
 
@@ -376,7 +384,7 @@ class PageAudit:
             myL.extend(myRake2.get_ranked_phrases())
             myL.extend(myRake3.get_ranked_phrases())
             return list(set(myL))
-        except:
+        except Exception:
             self.errors.append("article_keywords")
             return list()
 
@@ -391,7 +399,7 @@ class PageAudit:
                         {"Keyword": keyw, "Occurences": article.lower().count(keyw)}
                     )
             return keyword_count
-        except:
+        except Exception:
             self.errors.append("keyword_count")
             return list()
 
@@ -401,15 +409,19 @@ class PageAudit:
             tokenized_art = sent_tokenize(self.article)
             
             readability_scored = textstat(tokenized_art)
+            flattened_readability_scored = flatten_dict(readability_scored)
+            readability_score = flattened_readability_scored.get('readability grades_Coleman-Liau')
+            self.grade_level = readability_score
+            self.stats = flattened_readability_scored
             #readability_scored.get('Coleman-Liau')
             #print(readability_scored)
-            readability_score = readability_scored.get('Coleman-Liau')
-            #print(readability_score)
-            self.grade_level = readability_scored.get('Coleman-Liau')
-            #print(self.grade_level)
-            self.stats = dict(readability_scored)
+            # readability_score = readability_scored.get('readability grades').get('Coleman-Liau')
+            # #print(readability_score)
+            # self.grade_level = readability_scored.get('readability grades').get('Coleman-Liau')
+            # #print(self.grade_level)
+            # self.stats = dict(readability_scored.get())
             return readability_score
-        except:
+        except Exception:
             self.errors.append("readability_score")
             self.grade_level = 0.0
             self.stats = dict(stats="na")
@@ -435,7 +447,7 @@ class PageAudit:
             except Exception:
                 relevancy_score = 0.0
             return relevancy_score
-        except:
+        except Exception:
             self.errors.append("relevance_score")
             return 0.0
 
@@ -470,11 +482,11 @@ class PageAudit:
                     else:
                         linkPage = linkURL
                 if linkPage not in inboundLinks:
-                    inboundLinks[linkPage]: Dict[str, List[str]] = dict()
-                    inboundLinks[linkPage]["linkText"]: List[str] = list()
+                    inboundLinks[linkPage] = dict()
+                    inboundLinks[linkPage]["linkText"] = list()
                 inboundLinks[linkPage]["linkText"].append(linkText)
             return inboundLinks
-        except:
+        except Exception:
             self.inbound_links: Dict[str, Dict[str, List[str]]]
             self.inbound_links["inbound_links"] = dict()
             self.inbound_links["inbound_links"]["na"] = list()
@@ -506,17 +518,17 @@ class PageAudit:
                 else:
                     linkDomain: str = str(linkURL).split("http://")[1].split("/")[0]
                 if linkDomain not in outbound_links:
-                    outbound_links[linkDomain]: dict = dict()
+                    outbound_links[linkDomain] = dict()
                     outbound_links[linkDomain]["count"] = 0
-                    outbound_links[linkDomain]["linkText"]: List[str] = list()
-                    outbound_links[linkDomain]["pages"]: List[str] = list()
-                    outbound_links[linkDomain]["data"]: List[Dict[str, str]] = list()
+                    outbound_links[linkDomain]["linkText"] = list()
+                    outbound_links[linkDomain]["pages"] = list()
+                    outbound_links[linkDomain]["data"] = list()
                 outbound_links[linkDomain]["linkText"].append(linkText)
                 outbound_links[linkDomain]["count"] += 1
                 outbound_links[linkDomain]["pages"].append(linkURL)
                 outbound_links[linkDomain]["data"].append({linkText: linkURL})
             return outbound_links
-        except:
+        except Exception:
             self.outbound_links = dict(outbound_links="na")
             self.errors.append("outbound_links")
 
@@ -527,111 +539,111 @@ class CompareAudit:
             return
         try:
             self.cluster = myD["cluster"]
-        except:
+        except Exception:
             self.cluster = dict()
         try:
             self.urls = myD["urls"]
-        except:
+        except Exception:
             self.urls = list()
         try:
             self.total_length = myD["total_length"]
-        except:
+        except Exception:
             self.total_length = 0
 
         try:
             self.total_headings = myD["total_headings"]
-        except:
+        except Exception:
             self.total_headings = 0
 
         try:
             self.average_length = myD["average_length"]
-        except:
+        except Exception:
             self.average_length = 0.0
 
         try:
             self.average_header = myD["average_header"]
-        except:
+        except Exception:
             self.average_header = 0.0
 
         try:
             self.bestReadability = myD["bestReadability"]
-        except:
+        except Exception:
             self.bestReadability = 0.0
 
         try:
             self.bestTitle = myD["bestTitle"]
-        except:
+        except Exception:
             self.bestTitle = "None"
 
         try:
             self.bestURL = myD["bestURL"]
-        except:
+        except Exception:
             self.bestURL = "None"
 
         try:
             self.longestNum = myD["longestNum"]
-        except:
+        except Exception:
             self.longestNum = 0
 
         try:
             self.longestArt = myD["longestArt"]
-        except:
+        except Exception:
             self.longestArt = "None"
 
         try:
             self.longestURL = myD["longestURL"]
-        except:
+        except Exception:
             self.longestURL = "None"
 
         try:
             self.common_keywords = myD["common_keywords"]
-        except:
+        except Exception:
             self.common_keywords = {"None": 0}
 
         try:
             self.common_headings = myD["common_headings"]
-        except:
+        except Exception:
             self.common_headings = {"None": 0}
 
         try:
             self.common_oblinks = myD["common_oblinks"]
-        except:
+        except Exception:
             self.common_oblinks = [
                 "None",
             ]
 
         try:
             self.all_headings = myD["all_headings"]
-        except:
+        except Exception:
             self.all_headings = [
                 "None",
             ]
 
         try:
             self.all_keywords = myD["all_keywords"]
-        except:
+        except Exception:
             self.all_keywords = {"None": 0}
 
         try:
             self.all_oblinks = myD["all_oblinks"]
-        except:
+        except Exception:
             self.all_oblinks = [
                 "None",
             ]
 
         try:
             self.numAudits = myD["numAudits"]
-        except:
+        except Exception:
             self.numAudits = 0
 
         try:
             self.main_kw = myD["main_kw"]
-        except:
+        except Exception:
             self.main_kw = None
 
         try:
             self.avgCommonKWs = myD["avgCommonKWs"]
-        except:
+        except Exception:
             self.avgCommonKWs = [
                 ["None", 0],
             ]
@@ -642,7 +654,7 @@ class CompareAudit:
                 self.audits.append(
                     json.loads(self.cluster[url], object_hook=PageAudi2t)
                 )
-        except:
+        except Exception:
             self.audits = None
         return self
 
@@ -676,7 +688,7 @@ class CompareAudit:
                 auditp1 = json.load(
                     f, object_hook=CompareAudit
                 )  # CompareAudit.fromJson(f"output/search_results_audit/{dpg.get_value(self.inspectPicker)}.caudit")
-            except:
+            except Exception:
                 return CompareAudit({"None": PageAudit("None", "", "", 0)})
         p2 = json.loads(auditp1)
         p3 = p2["cluster"]
@@ -801,7 +813,7 @@ class CompareAudit:
                     self.all_keywords[kw] = (kw, kws["Occurences"])
             if aud.inbound_links:
                 for linkk, data in aud.inbound_links.items():
-                    if not linkk in self.inbounds:
+                    if linkk not in self.inbounds:
                         self.inbounds[linkk] = dict()
                         self.inbounds[linkk]["Occurences"] = 0
                         self.inbounds[linkk]["Texts"] = list()
@@ -843,7 +855,7 @@ class CompareAudit:
             self.main_kw = sorted(self.common_main_kws, key=lambda x: x, reverse=True)[
                 0
             ]
-        except:
+        except Exception:
             pass
         for ckw, stats in self.common_keywords.items():
             if stats["NumPages"] == 0:
@@ -851,7 +863,7 @@ class CompareAudit:
             avgU = stats["Occurences"] / stats["NumPages"]
             self.avgCommonKWs.append((ckw, avgU))
         if len(self.avgCommonKWs) < 5:
-            count = 0
+            # count = 0
             for kw in self.all_keywords:
                 self.avgCommonKWs.append((kw, 1))
         if self.numAudits == 0:
@@ -920,7 +932,7 @@ class GoogleResults:
                 )
                 # testiez = self.sesh.request("GET", "https://api.ipify.org?format=json")
                 # print(testiez.data.decode('utf-8'))
-            except:
+            except Exception:
                 self.sesh = urllib3.PoolManager()
         else:
             self.sesh = urllib3.PoolManager()
@@ -957,13 +969,13 @@ class GoogleResults:
                         "--disable-accelerated-2d-canvas",
                     ],            
                 )
-                context = browser.new_context()
+                context = browser.new_context(user_agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:135.0) Gecko/20100101 Firefox/135.0")
                 page = context.new_page()
                 params = {"q": self.query, "num": self.numResults}
                 url = 'https://google.com/search?' + urlencode(params, quote_via=quote_plus)
                 page.goto(url, wait_until="networkidle")
                 content = page.content()
-        except Exception as e:
+        except Exception:
             # print(e)
             return False
         # if self.response.status != 200:
@@ -977,7 +989,7 @@ class GoogleResults:
                 self.response = self.sesh.request(
                     "GET", f"https://google.com{clickLink}", headers=self.HEADERS, fields=params
                 )
-            except Exception as e:
+            except Exception:
                 # print(e)
                 return False
             if self.response.status != 200:
@@ -1099,7 +1111,7 @@ class SiteMap:
             "Accept-Language": "en-US,en;q=0.5",
         }
         self.netloc = urlparse(url).netloc
-        startime = time.time()
+        #startime = time.time()
 
     def go(self):
         loop = asyncio.new_event_loop()
@@ -1121,9 +1133,13 @@ class SiteMap:
     async def getPage(
         self, url: str, session: aiohttp.ClientSession
     ) -> tuple[Literal["sitemap"], list] | tuple[Literal["url"], list]:
-        async with session.request("GET", url, timeout=60.0, ssl=False) as response:
-            myResponse: str = await response.text()
-        sxml = bs(myResponse, "xml")
+        try:
+            async with session.request("GET", url, timeout=60.0, ssl=True) as response:
+                myResponse: str = await response.text()
+        except Exception as e:
+            print(e)
+            return ("None", ["None"])
+        sxml = BeautifulSoup(myResponse, "xml")
         psml = list()
         if len(sxml.find_all("sitemap")):
             for page in sxml.find_all("sitemap"):
@@ -1155,6 +1171,8 @@ class SiteMap:
                     break
                 tasks = [self.getPage(url, session) for url in self.sitemaps]
                 self.receiver: list[Any] = await asyncio.gather(*tasks)
+                if not self.receiver:
+                    continue
                 for t, r in self.receiver:
                     if "sitemap" in t:
                         self.sitemaps.extend(r)
@@ -1208,15 +1226,15 @@ class SiteMap:
                 fg.append(r.popitem())
         return fg
 
-    def get_WP_ids(self) -> tuple:
-        wpJsonUrl_post: str = f"https://{self.netloc}/wp-json/wp/v2/posts?per_page=100"
-        wpJsonUrl_pages: str = f"https://{self.netloc}/wp-json/wp/v2/pages?per_page=100"
-        self.postJson: list = list()
-        self.postJson.extend(self.getWPJson(wpJsonUrl_post))
-        ##print(postJson)
-        self.pageJson = list()
-        self.pageJson.extend(self.getWPJson(wpJsonUrl_pages))
-        return (self.postJson, self.pageJson)
+    # def get_WP_ids(self) -> tuple:
+    #     wpJsonUrl_post: str = f"https://{self.netloc}/wp-json/wp/v2/posts?per_page=100"
+    #     wpJsonUrl_pages: str = f"https://{self.netloc}/wp-json/wp/v2/pages?per_page=100"
+    #     self.postJson: list = list()
+    #     self.postJson.extend(self.getWPJson(wpJsonUrl_post))
+    #     ##print(postJson)
+    #     self.pageJson = list()
+    #     self.pageJson.extend(self.getWPJson(wpJsonUrl_pages))
+    #     return (self.postJson, self.pageJson)
 
     def get_WP_ids(netloc: str) -> tuple:
         wpJsonUrl_post: str = f"https://{netloc}/wp-json/wp/v2/posts?per_page=100"
@@ -1268,6 +1286,6 @@ class SiteMap:
                     break
                 numPages -= 1
             return postJson
-        except Exception as e:
+        except Exception:
             # print("what happened? " + str(e))
             return list()

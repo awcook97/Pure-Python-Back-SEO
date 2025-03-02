@@ -1,7 +1,7 @@
 import readability
 
-def textstat(*args):
-	return readability.getmeasures(*args)
+def textstat(*args, **kwargs):
+	return readability.getmeasures(*args, **kwargs)
 
 def init_textstat(name):
 	try:

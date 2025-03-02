@@ -238,7 +238,7 @@ class SEOReport:
         )
 
     def save(self, filename: str = "SEO Report") -> None:
-        self.fileName: str = f"output/reports/{filename}{random.randint(0,1000)}.docx"
+        self.fileName: str = f"output/reports/{cleanFilename(filename)}{random.randint(0,1000)}.docx"
         self.document.save(self.fileName)
 
 

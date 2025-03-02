@@ -122,6 +122,8 @@ def createCircleFromPositions(
 ) -> List[List[float]]:
     positions = []
     angle = 0
+    if numberOfPoints == 0:
+        numberOfPoints = 1
     angle_increment = 2 * math.pi / numberOfPoints
     for i in range(numberOfPoints):
         x = center[0] + radius * math.cos(angle)
@@ -255,7 +257,7 @@ class CoreAudit(Core_UI):
                 ) as self.searchurlgroup:
                     dpg.add_text("Sitemap: ")
                     self.auditinput: int | str = dpg.add_input_text(
-                        default_value="https://backseo.org/sitemap.xml",
+                        default_value="https://axel.llc/sitemap.xml",
                         hint="https://yoursite.com/sitemap.xml",
                         width=300,
                         callback=self.startAudit,

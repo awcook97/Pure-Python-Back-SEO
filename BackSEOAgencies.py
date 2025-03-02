@@ -1,4 +1,4 @@
-#!/usr/bin python3.10
+#!/usr/bin python3.12
 # from core import coreUI["Core"]
 
 
