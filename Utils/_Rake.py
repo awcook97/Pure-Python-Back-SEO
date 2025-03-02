@@ -12,13 +12,19 @@ from itertools import chain, groupby, product
 from typing import Callable, DefaultDict, Dict, List, Optional, Set, Tuple
 
 import nltk
+import nltk.downloader
 import nltk.tokenize
+
+nltk.download("punkt_tab")
+
+
 def init_Rake(name):
-	try:
-		suffix = b'_' + name.encode('ascii')
-	except UnicodeEncodeError:
-		suffix = b'U_' + name.encode('punycode').replace(b'-',b'_')
-	return b'PyInit' + suffix
+    try:
+        suffix = b"_" + name.encode("ascii")
+    except UnicodeEncodeError:
+        suffix = b"U_" + name.encode("punycode").replace(b"-", b"_")
+    return b"PyInit" + suffix
+
 
 # Readability type definitions.
 Word = str
@@ -41,7 +47,7 @@ class _Rake:
         self,
         stopwords: Optional[Set[str]] = None,
         punctuations: Optional[Set[str]] = None,
-        language: str = 'english',
+        language: str = "english",
         ranking_metric: Metric = Metric.DEGREE_TO_FREQUENCY_RATIO,
         max_length: int = 100000,
         min_length: int = 1,
@@ -88,7 +94,593 @@ class _Rake:
         if stopwords:
             self.stopwords = stopwords
         else:
-            self.stopwords = {"dr", "dra", "mr", "ms", "a", "a's", "able", "about", "above", "according", "accordingly", "across", "actually", "after", "afterwards", "again", "against", "ain't", "all", "allow", "allows", "almost", "alone", "along", "already", "also", "although", "always", "am", "among", "amongst", "an", "and", "another", "any", "anybody", "anyhow", "anyone", "anything", "anyway", "anyways", "anywhere", "apart", "appear", "appreciate", "appropriate", "are", "aren't", "around", "as", "aside", "ask", "asking", "associated", "at", "available", "away", "awfully", "b", "be", "became", "because", "become", "becomes", "becoming", "been", "before", "beforehand", "behind", "being", "believe", "below", "beside", "besides", "best", "better", "between", "beyond", "both", "brief", "but", "by", "c", "c'mon", "c's", "came", "can", "can't", "cannot", "cant", "cause", "causes", "certain", "certainly", "changes", "clearly", "co", "com", "come", "comes", "concerning", "consequently", "consider", "considering", "contain", "containing", "contains", "corresponding", "could", "couldn't", "course", "currently", "d", "definitely", "described", "despite", "did", "didn't", "different", "do", "does", "doesn't", "doing", "don't", "done", "down", "downwards", "during", "e", "each", "edu", "eg", "eight", "either", "else", "elsewhere", "enough", "entirely", "especially", "et", "etc", "even", "ever", "every", "everybody", "everyone", "everything", "everywhere", "ex", "exactly", "example", "except", "f", "far", "few", "fifth", "first", "five", "followed", "following", "follows", "for", "former", "formerly", "forth", "four", "from", "further", "furthermore", "g", "get", "gets", "getting", "given", "gives", "go", "goes", "going", "gone", "got", "gotten", "greetings", "h", "had", "hadn't", "happens", "hardly", "has", "hasn't", "have", "haven't", "having", "he", "he's", "hello", "help", "hence", "her", "here", "here's", "hereafter", "hereby", "herein", "hereupon", "hers", "herself", "hi", "him", "himself", "his", "hither", "hopefully", "how", "howbeit", "however", "i", "i'd", "i'll", "i'm", "i've", "ie", "if", "ignored", "immediate", "in", "inasmuch", "inc", "indeed", "indicate", "indicated", "indicates", "inner", "insofar", "instead", "into", "inward", "is", "isn't", "it", "it'd", "it'll", "it's", "its", "itself", "j", "just", "k", "keep", "keeps", "kept", "know", "knows", "known", "l", "last", "lately", "later", "latter", "latterly", "least", "less", "lest", "let", "let's", "like", "liked", "likely", "little", "look", "looking", "looks", "ltd", "m", "mainly", "many", "may", "maybe", "me", "mean", "meanwhile", "merely", "might", "more", "moreover", "most", "mostly", "much", "must", "my", "myself", "n", "name", "namely", "nd", "near", "nearly", "necessary", "need", "needs", "neither", "never", "nevertheless", "new", "next", "nine", "no", "nobody", "non", "none", "noone", "nor", "normally", "not", "nothing", "novel", "now", "nowhere", "o", "obviously", "of", "off", "often", "oh", "ok", "okay", "old", "on", "once", "one", "ones", "only", "onto", "or", "other", "others", "otherwise", "ought", "our", "ours", "ourselves", "out", "outside", "over", "overall", "own", "p", "particular", "particularly", "per", "perhaps", "placed", "please", "plus", "possible", "presumably", "probably", "provides", "q", "que", "quite", "qv", "r", "rather", "rd", "re", "really", "reasonably", "regarding", "regardless", "regards", "relatively", "respectively", "right", "s", "said", "same", "saw", "say", "saying", "says", "second", "secondly", "see", "seeing", "seem", "seemed", "seeming", "seems", "seen", "self", "selves", "sensible", "sent", "serious", "seriously", "seven", "several", "shall", "she", "should", "shouldn't", "since", "six", "so", "some", "somebody", "somehow", "someone", "something", "sometime", "sometimes", "somewhat", "somewhere", "soon", "sorry", "specified", "specify", "specifying", "still", "sub", "such", "sup", "sure", "t", "t's", "take", "taken", "tell", "tends", "th", "than", "thank", "thanks", "thanx", "that", "that's", "thats", "the", "their", "theirs", "them", "themselves", "then", "thence", "there", "there's", "thereafter", "thereby", "therefore", "therein", "theres", "thereupon", "these", "they", "they'd", "they'll", "they're", "they've", "think", "third", "this", "thorough", "thoroughly", "those", "though", "three", "through", "throughout", "thru", "thus", "to", "together", "too", "took", "toward", "towards", "tried", "tries", "truly", "try", "trying", "twice", "two", "u", "un", "under", "unfortunately", "unless", "unlikely", "until", "unto", "up", "upon", "us", "use", "used", "useful", "uses", "using", "usually", "uucp", "v", "value", "various", "very", "via", "viz", "vs", "w", "want", "wants", "was", "wasn't", "way", "we", "we'd", "we'll", "we're", "we've", "welcome", "well", "went", "were", "weren't", "what", "what's", "whatever", "when", "whence", "whenever", "where", "where's", "whereafter", "whereas", "whereby", "wherein", "whereupon", "wherever", "whether", "which", "while", "whither", "who", "who's", "whoever", "whole", "whom", "whose", "why", "will", "willing", "wish", "with", "within", "without", "won't", "wonder", "would", "would", "wouldn't", "x", "y", "yes", "yet", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves", "z", "zero", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
+            self.stopwords = {
+                "dr",
+                "dra",
+                "mr",
+                "ms",
+                "a",
+                "a's",
+                "able",
+                "about",
+                "above",
+                "according",
+                "accordingly",
+                "across",
+                "actually",
+                "after",
+                "afterwards",
+                "again",
+                "against",
+                "ain't",
+                "all",
+                "allow",
+                "allows",
+                "almost",
+                "alone",
+                "along",
+                "already",
+                "also",
+                "although",
+                "always",
+                "am",
+                "among",
+                "amongst",
+                "an",
+                "and",
+                "another",
+                "any",
+                "anybody",
+                "anyhow",
+                "anyone",
+                "anything",
+                "anyway",
+                "anyways",
+                "anywhere",
+                "apart",
+                "appear",
+                "appreciate",
+                "appropriate",
+                "are",
+                "aren't",
+                "around",
+                "as",
+                "aside",
+                "ask",
+                "asking",
+                "associated",
+                "at",
+                "available",
+                "away",
+                "awfully",
+                "b",
+                "be",
+                "became",
+                "because",
+                "become",
+                "becomes",
+                "becoming",
+                "been",
+                "before",
+                "beforehand",
+                "behind",
+                "being",
+                "believe",
+                "below",
+                "beside",
+                "besides",
+                "best",
+                "better",
+                "between",
+                "beyond",
+                "both",
+                "brief",
+                "but",
+                "by",
+                "c",
+                "c'mon",
+                "c's",
+                "came",
+                "can",
+                "can't",
+                "cannot",
+                "cant",
+                "cause",
+                "causes",
+                "certain",
+                "certainly",
+                "changes",
+                "clearly",
+                "co",
+                "com",
+                "come",
+                "comes",
+                "concerning",
+                "consequently",
+                "consider",
+                "considering",
+                "contain",
+                "containing",
+                "contains",
+                "corresponding",
+                "could",
+                "couldn't",
+                "course",
+                "currently",
+                "d",
+                "definitely",
+                "described",
+                "despite",
+                "did",
+                "didn't",
+                "different",
+                "do",
+                "does",
+                "doesn't",
+                "doing",
+                "don't",
+                "done",
+                "down",
+                "downwards",
+                "during",
+                "e",
+                "each",
+                "edu",
+                "eg",
+                "eight",
+                "either",
+                "else",
+                "elsewhere",
+                "enough",
+                "entirely",
+                "especially",
+                "et",
+                "etc",
+                "even",
+                "ever",
+                "every",
+                "everybody",
+                "everyone",
+                "everything",
+                "everywhere",
+                "ex",
+                "exactly",
+                "example",
+                "except",
+                "f",
+                "far",
+                "few",
+                "fifth",
+                "first",
+                "five",
+                "followed",
+                "following",
+                "follows",
+                "for",
+                "former",
+                "formerly",
+                "forth",
+                "four",
+                "from",
+                "further",
+                "furthermore",
+                "g",
+                "get",
+                "gets",
+                "getting",
+                "given",
+                "gives",
+                "go",
+                "goes",
+                "going",
+                "gone",
+                "got",
+                "gotten",
+                "greetings",
+                "h",
+                "had",
+                "hadn't",
+                "happens",
+                "hardly",
+                "has",
+                "hasn't",
+                "have",
+                "haven't",
+                "having",
+                "he",
+                "he's",
+                "hello",
+                "help",
+                "hence",
+                "her",
+                "here",
+                "here's",
+                "hereafter",
+                "hereby",
+                "herein",
+                "hereupon",
+                "hers",
+                "herself",
+                "hi",
+                "him",
+                "himself",
+                "his",
+                "hither",
+                "hopefully",
+                "how",
+                "howbeit",
+                "however",
+                "i",
+                "i'd",
+                "i'll",
+                "i'm",
+                "i've",
+                "ie",
+                "if",
+                "ignored",
+                "immediate",
+                "in",
+                "inasmuch",
+                "inc",
+                "indeed",
+                "indicate",
+                "indicated",
+                "indicates",
+                "inner",
+                "insofar",
+                "instead",
+                "into",
+                "inward",
+                "is",
+                "isn't",
+                "it",
+                "it'd",
+                "it'll",
+                "it's",
+                "its",
+                "itself",
+                "j",
+                "just",
+                "k",
+                "keep",
+                "keeps",
+                "kept",
+                "know",
+                "knows",
+                "known",
+                "l",
+                "last",
+                "lately",
+                "later",
+                "latter",
+                "latterly",
+                "least",
+                "less",
+                "lest",
+                "let",
+                "let's",
+                "like",
+                "liked",
+                "likely",
+                "little",
+                "look",
+                "looking",
+                "looks",
+                "ltd",
+                "m",
+                "mainly",
+                "many",
+                "may",
+                "maybe",
+                "me",
+                "mean",
+                "meanwhile",
+                "merely",
+                "might",
+                "more",
+                "moreover",
+                "most",
+                "mostly",
+                "much",
+                "must",
+                "my",
+                "myself",
+                "n",
+                "name",
+                "namely",
+                "nd",
+                "near",
+                "nearly",
+                "necessary",
+                "need",
+                "needs",
+                "neither",
+                "never",
+                "nevertheless",
+                "new",
+                "next",
+                "nine",
+                "no",
+                "nobody",
+                "non",
+                "none",
+                "noone",
+                "nor",
+                "normally",
+                "not",
+                "nothing",
+                "novel",
+                "now",
+                "nowhere",
+                "o",
+                "obviously",
+                "of",
+                "off",
+                "often",
+                "oh",
+                "ok",
+                "okay",
+                "old",
+                "on",
+                "once",
+                "one",
+                "ones",
+                "only",
+                "onto",
+                "or",
+                "other",
+                "others",
+                "otherwise",
+                "ought",
+                "our",
+                "ours",
+                "ourselves",
+                "out",
+                "outside",
+                "over",
+                "overall",
+                "own",
+                "p",
+                "particular",
+                "particularly",
+                "per",
+                "perhaps",
+                "placed",
+                "please",
+                "plus",
+                "possible",
+                "presumably",
+                "probably",
+                "provides",
+                "q",
+                "que",
+                "quite",
+                "qv",
+                "r",
+                "rather",
+                "rd",
+                "re",
+                "really",
+                "reasonably",
+                "regarding",
+                "regardless",
+                "regards",
+                "relatively",
+                "respectively",
+                "right",
+                "s",
+                "said",
+                "same",
+                "saw",
+                "say",
+                "saying",
+                "says",
+                "second",
+                "secondly",
+                "see",
+                "seeing",
+                "seem",
+                "seemed",
+                "seeming",
+                "seems",
+                "seen",
+                "self",
+                "selves",
+                "sensible",
+                "sent",
+                "serious",
+                "seriously",
+                "seven",
+                "several",
+                "shall",
+                "she",
+                "should",
+                "shouldn't",
+                "since",
+                "six",
+                "so",
+                "some",
+                "somebody",
+                "somehow",
+                "someone",
+                "something",
+                "sometime",
+                "sometimes",
+                "somewhat",
+                "somewhere",
+                "soon",
+                "sorry",
+                "specified",
+                "specify",
+                "specifying",
+                "still",
+                "sub",
+                "such",
+                "sup",
+                "sure",
+                "t",
+                "t's",
+                "take",
+                "taken",
+                "tell",
+                "tends",
+                "th",
+                "than",
+                "thank",
+                "thanks",
+                "thanx",
+                "that",
+                "that's",
+                "thats",
+                "the",
+                "their",
+                "theirs",
+                "them",
+                "themselves",
+                "then",
+                "thence",
+                "there",
+                "there's",
+                "thereafter",
+                "thereby",
+                "therefore",
+                "therein",
+                "theres",
+                "thereupon",
+                "these",
+                "they",
+                "they'd",
+                "they'll",
+                "they're",
+                "they've",
+                "think",
+                "third",
+                "this",
+                "thorough",
+                "thoroughly",
+                "those",
+                "though",
+                "three",
+                "through",
+                "throughout",
+                "thru",
+                "thus",
+                "to",
+                "together",
+                "too",
+                "took",
+                "toward",
+                "towards",
+                "tried",
+                "tries",
+                "truly",
+                "try",
+                "trying",
+                "twice",
+                "two",
+                "u",
+                "un",
+                "under",
+                "unfortunately",
+                "unless",
+                "unlikely",
+                "until",
+                "unto",
+                "up",
+                "upon",
+                "us",
+                "use",
+                "used",
+                "useful",
+                "uses",
+                "using",
+                "usually",
+                "uucp",
+                "v",
+                "value",
+                "various",
+                "very",
+                "via",
+                "viz",
+                "vs",
+                "w",
+                "want",
+                "wants",
+                "was",
+                "wasn't",
+                "way",
+                "we",
+                "we'd",
+                "we'll",
+                "we're",
+                "we've",
+                "welcome",
+                "well",
+                "went",
+                "were",
+                "weren't",
+                "what",
+                "what's",
+                "whatever",
+                "when",
+                "whence",
+                "whenever",
+                "where",
+                "where's",
+                "whereafter",
+                "whereas",
+                "whereby",
+                "wherein",
+                "whereupon",
+                "wherever",
+                "whether",
+                "which",
+                "while",
+                "whither",
+                "who",
+                "who's",
+                "whoever",
+                "whole",
+                "whom",
+                "whose",
+                "why",
+                "will",
+                "willing",
+                "wish",
+                "with",
+                "within",
+                "without",
+                "won't",
+                "wonder",
+                "would",
+                "would",
+                "wouldn't",
+                "x",
+                "y",
+                "yes",
+                "yet",
+                "you",
+                "you'd",
+                "you'll",
+                "you're",
+                "you've",
+                "your",
+                "yours",
+                "yourself",
+                "yourselves",
+                "z",
+                "zero",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "0",
+            }
 
         # If punctuations are not provided we ignore all punctuation symbols.
         self.punctuations: Set[str]
@@ -112,7 +704,7 @@ class _Rake:
         if sentence_tokenizer:
             self.sentence_tokenizer = sentence_tokenizer
         else:
-            self.sentence_tokenizer = nltk.tokenize.sent_tokenize # type: ignore
+            self.sentence_tokenizer = nltk.tokenize.sent_tokenize  # type: ignore
         self.word_tokenizer: Callable[[str], List[str]]
         if word_tokenizer:
             self.word_tokenizer = word_tokenizer
@@ -211,14 +803,16 @@ class _Rake:
         :param phrase_list: List of List of strings where each sublist is a
                             collection of words which form a contender phrase.
         """
-        co_occurance_graph: DefaultDict[Word, DefaultDict[Word, int]] = defaultdict(lambda: defaultdict(lambda: 0))
+        co_occurance_graph: DefaultDict[Word, DefaultDict[Word, int]] = defaultdict(
+            lambda: defaultdict(lambda: 0)
+        )
         for phrase in phrase_list:
             # For each phrase in the phrase list, count co-occurances of the
             # word with other words in the phrase.
             #
             # Note: Keep the co-occurances graph as is, to help facilitate its
             # use in other creative ways if required later.
-            for (word, coword) in product(phrase, phrase):
+            for word, coword in product(phrase, phrase):
                 co_occurance_graph[word][coword] += 1
         self.degree = defaultdict(lambda: 0)
         for key in co_occurance_graph:
@@ -244,7 +838,7 @@ class _Rake:
                     rank += 1.0 * self.degree[word]
                 else:
                     rank += 1.0 * self.frequency_dist[word]
-            self.rank_list.append((rank, ' '.join(phrase)))
+            self.rank_list.append((rank, " ".join(phrase)))
         self.rank_list.sort(reverse=True)
         self.ranked_phrases = [ph[1] for ph in self.rank_list]
 
@@ -260,7 +854,9 @@ class _Rake:
         phrase_list: List[Phrase] = []
         # Create contender phrases from sentences.
         for sentence in sentences:
-            word_list: List[Word] = [word.lower() for word in self._tokenize_sentence_to_words(sentence)]
+            word_list: List[Word] = [
+                word.lower() for word in self._tokenize_sentence_to_words(sentence)
+            ]
             phrase_list.extend(self._get_phrase_list_from_words(word_list))
 
         # Based on user's choice to include or not include repeated phrases
@@ -302,94 +898,47 @@ class _Rake:
         """
         groups = groupby(word_list, lambda x: x not in self.to_ignore)
         phrases: List[Phrase] = [tuple(group[1]) for group in groups if group[0]]
-        return list(filter(lambda x: self.min_length <= len(x) <= self.max_length, phrases))
+        return list(
+            filter(lambda x: self.min_length <= len(x) <= self.max_length, phrases)
+        )
+
 
 if __name__ == "__main__":
+    # import unicodedata
     myP = list(string.punctuation)
     myP.extend(list(string.digits))
-    #print(myP)
+    # print(myP)
     myP.append("“")
+    myP.append("’")
     myP.append("-")
-    myP.append("-")
-    myP.append("” ")
+    myP.append("”")
     myP.append("—")
-    
-    myRake = _Rake(include_repeated_phrases=False, max_length=7, min_length=2, ranking_metric=Metric.DEGREE_TO_FREQUENCY_RATIO)
-    myRake2 = _Rake(include_repeated_phrases=False, max_length=7, min_length=2, ranking_metric=Metric.WORD_DEGREE)
-    myRake3 = _Rake(include_repeated_phrases=False, max_length=7, min_length=2, ranking_metric=Metric.WORD_FREQUENCY)
-    #print(myRake.get_word_degrees())
+
+    myRake = _Rake(
+        include_repeated_phrases=False,
+        max_length=7,
+        min_length=2,
+        ranking_metric=Metric.DEGREE_TO_FREQUENCY_RATIO,
+        word_tokenizer=nltk.tokenize.TweetTokenizer().tokenize,
+    )
+    myRake2 = _Rake(
+        include_repeated_phrases=False,
+        max_length=7,
+        min_length=2,
+        ranking_metric=Metric.WORD_DEGREE,
+        word_tokenizer=nltk.tokenize.word_tokenize,
+    )
+    myRake3 = _Rake(
+        stopwords=["_"],
+        include_repeated_phrases=True,
+        punctuations=set(nltk.tokenize.PunktSentenceTokenizer.PUNCTUATION),
+        max_length=7,
+        min_length=2,
+        ranking_metric=Metric.WORD_FREQUENCY,
+        sentence_tokenizer=nltk.tokenize.PunktTokenizer().tokenize,
+    )
+    # print(myRake.get_word_degrees())
     myT = """An Introduction to SEO Basics
-		1.
-		20 Years of SEO: A Brief History of Search Engine Optimization
-		2.
-		How Does SEO Work
-		3.
-		Why Do People Visit Websites Today?
-		4.
-		Why Search – and SEO – Is Important
-		5.
-		71 Mind-Blowing Search Engine Optimization Stats
-		6.
-		Meet the 7 Most Popular Search Engines in the World
-		7.
-		SEO Strategy vs. Tactics: What’s the Difference? A Lot!
-		8.
-		Google Webmaster Guidelines: Everything You Need to Know & Understand
-		9.
-		How People Search: Understanding User Intent
-		10.
-		44 Free Tools to Help You Find What People Search For
-		11.
-		Why Links Are Important for SEO
-		12.
-		Why Keywords Are Still So Very Important for SEO
-		13.
-		Why Content Is Important for SEO
-		14.
-		9 Essential Types of Webpages Every SEO Pro Needs to Know
-		15.
-		How Long Does SEO Take?
-		16.
-		How to Spot SEO Myths: 20 Common SEO Myths, Debunked
-		17.
-		Learn SEO: A Blueprint From Beginner To Advanced
-		18.
-		The Best SEO Conferences to Attend
-		19.
-		202 Top SEO Experts You Should Be Following
-		20.
-		How to Become an SEO Expert
-		A Complete Guide to SEO
-		21.
-		SEO Fundamentals: Your Guide to SEO Success Factors
-		22.
-		5 Things Every SEO Strategy Needs
-		23.
-		How to Know Your Audience to Master Your Marketing Campaigns
-		24.
-		The Three Pillars of SEO: Authority, Relevance, and Trust
-		25.
-		Why Your SEO Focus Should Be Brand Building
-		26.
-		Why & How to Track Google Algorithm Updates
-		27.
-		A Beginner’s Guide to SEO in a Machine Learning World
-		28.
-		Why Keyword Research Is Useful for SEO & How to Rank
-		29.
-		See, Think, Do, Care: A New Way to Communicate Your SEO Strategy
-		30.
-		Making SEO & User Experience Work Together
-		31.
-		An Introduction to Mobile SEO
-		32.
-		Agile SEO: Moving from Strategy to Action
-		33.
-		The 9 Most Important SEO KPIs You Should Be Tracking
-		34.
-		SEO Strategy: 3 Trade-offs You Must Consider
-		35.
-		What to Do When Things Go Wrong in SEO
 		What is SEO? At its core, the meaning of search engine optimization (SEO) is increasing your website’s visibility in the organic search results of major search engines.
 
 		To get that visibility, you must understand three core components:
@@ -434,12 +983,15 @@ if __name__ == "__main__":
     myRake.extract_keywords_from_text(myT)
     myRake2.extract_keywords_from_text(myT)
     myRake3.extract_keywords_from_text(myT)
-    myDTF = myRake.get_ranked_phrases_with_scores()[:10]
-    myWD = myRake2.get_ranked_phrases_with_scores()[:10]
-    myWF = myRake3.get_ranked_phrases_with_scores()[:10]
-    
-    mynewRake = _Rake(include_repeated_phrases=False,ranking_metric=Metric.DEGREE_TO_FREQUENCY_RATIO)
+    myDTF = myRake.get_ranked_phrases_with_scores()
+    myWD = myRake2.get_ranked_phrases_with_scores()
+    myWF = myRake3.get_ranked_phrases_with_scores()
+    # print(myRake.get_word_frequency_distribution())
+
+    mynewRake = _Rake(
+        include_repeated_phrases=True, ranking_metric=Metric.DEGREE_TO_FREQUENCY_RATIO, sentence_tokenizer=nltk.tokenize.PunktTokenizer().tokenize,
+    )
     mynewRake.extract_keywords_from_text(myT)
-    for i in range(10):
+    for i in range(int(len(myDTF)/2)):
         print(f"{i}DTF {myDTF[i]} --- WD {myWD[i]} ---- WF {myWF[i]}")
-    #print(mynewRake.get_ranked_phrases_with_scores())
+    print(mynewRake.get_ranked_phrases_with_scores()[:10])

@@ -19,8 +19,10 @@ Before you can install and run this tool, ensure you have the following installe
     ```
 3. Install the required dependencies:
     ```bash
-   uv pip install -r requirements.txt
-   uv run playwright install firefox
+    uv venv
+    source .venv/bin/activate
+    uv pip install -r requirements.txt
+    playwright install firefox
     ```
 
 ## Running the Application
