@@ -122,6 +122,8 @@ def createCircleFromPositions(
 ) -> List[List[float]]:
     positions = []
     angle = 0
+    if numberOfPoints == 0:
+        numberOfPoints = 1
     angle_increment = 2 * math.pi / numberOfPoints
     for i in range(numberOfPoints):
         x = center[0] + radius * math.cos(angle)

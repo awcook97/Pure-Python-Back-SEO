@@ -1133,8 +1133,12 @@ class SiteMap:
     async def getPage(
         self, url: str, session: aiohttp.ClientSession
     ) -> tuple[Literal["sitemap"], list] | tuple[Literal["url"], list]:
-        async with session.request("GET", url, timeout=60.0, ssl=False) as response:
-            myResponse: str = await response.text()
+        try:
+            async with session.request("GET", url, timeout=60.0, ssl=True) as response:
+                myResponse: str = await response.text()
+        except Exception as e:
+            print(e)
+            return ("None", ["None"])
         sxml = BeautifulSoup(myResponse, "xml")
         psml = list()
         if len(sxml.find_all("sitemap")):
@@ -1167,6 +1171,8 @@ class SiteMap:
                     break
                 tasks = [self.getPage(url, session) for url in self.sitemaps]
                 self.receiver: list[Any] = await asyncio.gather(*tasks)
+                if not self.receiver:
+                    continue
                 for t, r in self.receiver:
                     if "sitemap" in t:
                         self.sitemaps.extend(r)
