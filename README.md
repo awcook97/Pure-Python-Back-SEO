@@ -1,7 +1,10 @@
 # Pure Python Back SEO Agencies
 
 ## Introduction
-Pure Python Back SEO Agencies is a tool designed to help SEO agencies manage and create reports for their clients using Python.
+Pure Python Back SEO Agencies is a tool designed to help SEO agencies manage and create reports for their clients using Python. Back SEO Agencies comes with 3 primary features:
+- Inspecting the contents of Google Results from just 1 page (Keywords, Content length, Headers, readability, Schema, etc.)
+- Auditing YOUR clients websites very quickly (1000 pages in a sitemap takes less than 5 minutes)
+- Local rank gridmap reporting 
 
 ## Prerequisites
 Before you can install and run this tool, ensure you have the following installed:
@@ -31,3 +34,4 @@ To run the application, execute the following command:
 python BackSEOAgencies.py
 ```
 
+Go ahead, Star this repo, download it, and start playing with it. Let me know how many clients you land using this reporting software.
