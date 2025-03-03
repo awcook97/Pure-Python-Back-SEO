@@ -1,19 +1,16 @@
 import aiohttp
 import asyncio
 import json
-import regex
-import base64
 import multiprocessing
 import os
 
-try:
-    from Utils._Scraperz import GoogleResults, PageAudit, CompareAudit
-except Exception:
-    from _Scraperz import GoogleResults
+
+from Utils._Scraperz import PageAudit, CompareAudit
+from Utils._GoogleResults import GoogleResults
+
 from threading import Thread
 import pickle
-from typing import Any, Dict, Literal
-import certifi
+from typing import Any, Literal
 import dearpygui.dearpygui as dpg
 import time
 from multiprocessing.pool import Pool

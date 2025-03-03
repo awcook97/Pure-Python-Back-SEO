@@ -9,6 +9,10 @@ cchardet-2.1.7.dist-info/**
 cchardet-2.1.7.tar.gz
 cchardet-2.1.7/**
 cchardet-2.1.7
-Pure-Python-Back-SEO/**
-Pure-Python-Back-SEO
+Fonts/USERFONT
+Fonts/USERSIZE
+Fonts/USERSCALE
+
 SEO/Resources/agency
+bseodef.ini
+Fonts/USERFONT

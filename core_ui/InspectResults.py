@@ -4,7 +4,8 @@ from core_ui.Widgets.AuditView import AuditView
 from BackSEODataHandler import getBackSEODataHandler
 import os
 import json
-from Utils._Scraperz import PageAudit, CompareAudit, GoogleResults, CustomThread
+from Utils._Scraperz import CompareAudit, CustomThread
+from Utils._GoogleResults import GoogleResults
 from Utils import cleanFilename, sort_callback
 import pickle
 import random

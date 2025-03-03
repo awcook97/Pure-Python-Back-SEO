@@ -15,7 +15,7 @@ import nltk
 import nltk.downloader
 import nltk.tokenize
 
-nltk.download("punkt_tab")
+nltk.download("punkt_tab", quiet=True)
 
 
 def init_Rake(name):
@@ -929,7 +929,7 @@ if __name__ == "__main__":
         word_tokenizer=nltk.tokenize.word_tokenize,
     )
     myRake3 = _Rake(
-        stopwords=["_"],
+        stopwords=set(nltk.corpus.stopwords.words("english")),
         include_repeated_phrases=True,
         punctuations=set(nltk.tokenize.PunktSentenceTokenizer.PUNCTUATION),
         max_length=7,
@@ -986,12 +986,12 @@ if __name__ == "__main__":
     myDTF = myRake.get_ranked_phrases_with_scores()
     myWD = myRake2.get_ranked_phrases_with_scores()
     myWF = myRake3.get_ranked_phrases_with_scores()
-    # print(myRake.get_word_frequency_distribution())
+    # print(myRake3.())
 
     mynewRake = _Rake(
         include_repeated_phrases=True, ranking_metric=Metric.DEGREE_TO_FREQUENCY_RATIO, sentence_tokenizer=nltk.tokenize.PunktTokenizer().tokenize,
     )
     mynewRake.extract_keywords_from_text(myT)
-    for i in range(int(len(myDTF)/2)):
+    for i in range(int(len(myWF)/2)):
         print(f"{i}DTF {myDTF[i]} --- WD {myWD[i]} ---- WF {myWF[i]}")
     print(mynewRake.get_ranked_phrases_with_scores()[:10])

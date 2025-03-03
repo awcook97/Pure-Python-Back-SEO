@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify, send_file
 import dearpygui.dearpygui as dpg
 import threading
+import SEO.Agency as _Agency
 import os
 class FlaskApp:
-    def __init__(self, agency):
+    def __init__(self, agency: _Agency.Agency):
         self.agency = agency
         self.currentReports = list()
         self.app = Flask(__name__)
@@ -119,5 +120,9 @@ class FlaskApp:
             self.agency.start_reports()
             return '', 204
 
-    def run(self, debug: bool=True, host: str='0.0.0.0', port: int=5000):
-        threading.Thread(target=self.app.run, kwargs={"host":host, "port":port, "debug":debug}).start()
+    def run(self, debug: bool=True, host: str='0.0.0.0', port: int=5000) -> None:
+        self.runThread = threading.Thread(target=self.app.run, kwargs={"host":host, "port":port, "debug":debug}, daemon=True)
+        self.runThread.start()
+        
+    def stop(self) -> None:
+        self.runThread.join(1)

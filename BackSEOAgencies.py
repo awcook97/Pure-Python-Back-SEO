@@ -1,13 +1,13 @@
 #!/usr/bin python3.12
 # from core import coreUI["Core"]
+import multiprocessing
 
+from multiprocessing import Queue, pool
 
 from BackSEOSettings import BackSEOSettings
 import dearpygui.dearpygui as dpg
 import inspect
 import time
-import multiprocessing
-from multiprocessing import Queue, pool
 import threading
 
 
@@ -59,7 +59,7 @@ def is_slow(job):
 def myrun_callbacks(*args, jobs, job_queue):
     if jobs is None:
         return
-    dpg.save_init_file("bseodef.ini")
+    #dpg.save_init_file("bseodef.ini")
     for job in jobs:
         callback = job[0]
         if callback is None:
@@ -144,6 +144,8 @@ def gui_thread(job_queue: Queue, result_queue: Queue, backseosettings: BackSEOSe
         if not backseosettings.vsync and backseosettings.fps > 0:
             time.sleep(1 / backseosettings.fps)
     dpg.destroy_context()
+    backManager.FlaskApp.stop()
+    
 
 
 def otherMain(backPool: pool.Pool, backseosettings: BackSEOSettings):
@@ -178,6 +180,8 @@ def otherMain(backPool: pool.Pool, backseosettings: BackSEOSettings):
     for _ in range(helperthreads):
         job_queue.put("STOP")
         # p.join()
+    
+    backPool.terminate()
 
 
 if __name__ == "__main__":
@@ -186,6 +190,8 @@ if __name__ == "__main__":
     backseosettings = BackSEOSettings()
     global lock
     lock = multiprocessing.Lock()
+    
+    
     with pool.Pool(
         processes=int(backseosettings.cpucores), initargs=(lock,)
     ) as backPool:

@@ -324,7 +324,7 @@ class AuditView:
         self.pageAuditOutbound_links.update(pageAuditOutbound_links)
         self.pageAuditSchema.update(pageAuditSchema)
         self.updateSchema(page=cpa)
-        # self.showContentScore()
+        #self.showContentScore()
 
     def updateSchema(self, page: PageAudit):
         dpg.delete_item(self.schemaNodeEditor, children_only=True)
@@ -370,23 +370,33 @@ class AuditView:
                         theNode = self.schemaItems[theid]
                     else:
                         self.schemaItems[label][theid] = dpg.add_node(
-                            parent=parent, pos=posit, label=label
+                            parent=parent, pos=posit, label=label, tracked=True
                         )
                         theNode = self.schemaItems[label][theid]
+                        with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static, parent=theNode):
+                            dpg.add_text("")
                 else:
-                    theNode = dpg.add_node(parent=parent, pos=posit, label=label)
+                    theNode = dpg.add_node(parent=parent, pos=posit, label=label, tracked=True)
+                    with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static, parent=theNode):
+                        dpg.add_text("")
                     self.schemaItems[label][label] = theNode
             elif "@id" in schema:
                 theid = schema.pop("@id")
                 if theid in self.schemaItems:
                     theNode = self.schemaItems[theid]
                 else:
-                    theNode = dpg.add_node(parent=parent, pos=posit, label=label)
+                    theNode = dpg.add_node(parent=parent, pos=posit, label=label, tracked=True)
+                    with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static, parent=theNode):
+                        dpg.add_text("")
                     self.schemaItems[theid] = theNode
             else:
-                theNode = dpg.add_node(parent=parent, pos=posit, label=label)
+                theNode = dpg.add_node(parent=parent, pos=posit, label=label, tracked=True)
+                with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static, parent=theNode):
+                    dpg.add_text("")
         else:
-            theNode = dpg.add_node(parent=parent, pos=posit, label=label)
+            theNode = dpg.add_node(parent=parent, pos=posit, label=label, tracked=True)
+            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static, parent=theNode):
+                dpg.add_text("")
 
         theatt = dpg.add_node_attribute(
             label=f"List", parent=theNode, attribute_type=dpg.mvNode_Attr_Input
@@ -750,7 +760,8 @@ class AuditView:
             delink_callback=lambda sender, app_data: dpg.delete_item(app_data),
             minimap=True,
             minimap_location=dpg.mvNodeMiniMap_Location_BottomLeft,
-            menubar=True,
+            menubar=True, 
+            track_offset= 0
         )
 
     def buildCommonMetaData(self):
@@ -761,12 +772,13 @@ class AuditView:
         pass
 
     def showContentScore(self, *args, **kwargs):
-        # self.contenscore = CoreContentScore(self.compareAudit.avgCommonKWs, self.compareAudit.average_header,
-        # 				self.compareAudit.average_length, self.compareAudit.bestReadability,self.currentPageAudit.article)
+        self.contenscore = CoreContentScore(self.compareAudit.avgCommonKWs, self.compareAudit.average_header,
+        				self.compareAudit.average_length, self.compareAudit.bestReadability,self.currentPageAudit.article)
         self.contenscore.updateSources(0, self.compareAudit.avgCommonKWs)
         self.contenscore.updateSources(1, self.compareAudit.average_header)
         self.contenscore.updateSources(2, self.compareAudit.average_length)
         self.contenscore.updateSources(3, self.compareAudit.bestReadability)
+        self.contenscore.updateSources(4, self.currentPageAudit.article)
         self.contenscore.updateSources(
             5,
             (
@@ -776,6 +788,7 @@ class AuditView:
                 self.currentPageAudit.article,
             ),
         )
+        self.contenscore.draw(self.pageAuditsContentScoreGroup)
 
     def updateAudit(self, *args, **kwargs):
         if len(args):

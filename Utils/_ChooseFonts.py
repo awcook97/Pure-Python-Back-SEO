@@ -1,8 +1,7 @@
 import dearpygui.dearpygui as dpg
 import os
-#import ctypes
-# Include the following code before showing the viewport/calling `dearpygui.dearpygui.show_viewport`.
-#ctypes.windll.shcore.SetProcessDpiAwareness(2)
+import platform
+
 def init_ChooseFonts(name):
 	try:
 		suffix = b'_' + name.encode('ascii')
@@ -68,13 +67,24 @@ class ChooseFonts():
 					dpg.add_font_range(0x000, 0xFFF)
 					dpg.add_font_range(0x0000, 0xFFFF)
 				dpg.bind_font(f)
-		self.fontDict["WINDOWS FONTS"] = None
+		self.fontDict["OTHER FONTS"] = None
 		try:
-			for filename in os.listdir('C:\\Windows\\Fonts'):
-				if filename.endswith((".ttf","otf")):
-					self.fontDict[filename] = f"C:\\Windows\\Fonts\\{filename}"
+			if platform.system() == "Windows":
+				for filename in os.listdir('C:\\Windows\\Fonts'):
+					if filename.endswith((".ttf","otf")):
+						self.fontDict[filename] = f"C:\\Windows\\Fonts\\{filename}"
+			elif platform.system() == "Darwin":
+				for filename in os.listdir('/Library/Fonts'):
+					if filename.endswith((".ttf","otf")):
+						self.fontDict[filename] = f"/Library/Fonts/{filename}"
+			elif platform.system() == "Linux":
+				for root, dir, filelist in os.walk('/usr/share/fonts/truetype'):
+					for filename in filelist:
+						if filename.endswith((".ttf","otf")):
+							#print(f"ROOT{root}DIR{dir}FILE{filename}")
+							self.fontDict[filename] = f"{root}/{filename}"
 		except:
-			self.fontDict.pop("WINDOWS FONTS")
+			self.fontDict.pop("OTHER FONTS")
 		if len(self.fontDict) > 0:
 			if self.userFont in self.fontDict: 
 				dpg.add_font(self.fontDict[self.userFont], size=self.userSize, parent=self.font_registry, tag="fntCFPNewFont")

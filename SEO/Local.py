@@ -1,5 +1,4 @@
 from core_ui import Core_UI
-from core_ui.Widgets import Add_Info
 from SEO.Resources._LocalSyncTracker import runLocations
 import dearpygui.dearpygui as dpg
 from Utils._Scraperz import CustomThread
@@ -9,7 +8,7 @@ import time
 import os
 
 
-# http://sdze:wFqK@5.78.106.79:51791
+
 class Local(Core_UI):
     def __init__(self) -> None:
         self.locked = False
@@ -296,7 +295,7 @@ class Local(Core_UI):
         dpg.set_primary_window(self.real_primary_window, False)
         dpg.set_primary_window(tempWin, True)
         dpg.render_dearpygui_frame()
-        time.sleep(1)
+        time.sleep(.5)
         dpg.render_dearpygui_frame()
 
         outpath = f"output/localclients/{Utils.cleanFilename(theBusiness)}/{Utils.cleanFilename(data['keyword'])}"

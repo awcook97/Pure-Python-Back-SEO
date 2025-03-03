@@ -1,11 +1,11 @@
+# Audit
 from core_ui import Core_UI
 from core_ui.Widgets.BasicVroom import BasicVroom, PlotVroom
 import dearpygui.dearpygui as dpg
 from core_ui.Widgets.AuditView import AuditView
 from Utils import cleanFilename, sort_callback
-from Utils._Scraperz import PageAudit, CompareAudit, SiteMap, CustomThread
-from typing import Any, List, Dict, Literal
-from BackSEODataHandler import getBackSEODataHandler
+from Utils._Scraperz import CompareAudit, SiteMap, CustomThread
+from typing import List, Dict, Literal
 import json
 import os
 import pickle

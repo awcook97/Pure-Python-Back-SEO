@@ -515,13 +515,13 @@ class MapTile:
         if texture is None:
             dpg.draw_rectangle(pmin, pmax, fill=(128, 128, 128, 255), parent=parent)
             return False
-
-        self.image_tag = dpg.draw_image(
-            texture,
-            pmin,
-            pmax,
-            parent=parent,
-        )
+        if dpg.does_item_exist(parent):
+            self.image_tag = dpg.draw_image(
+                texture,
+                pmin,
+                pmax,
+                parent=parent,
+            )
         return True
 
 

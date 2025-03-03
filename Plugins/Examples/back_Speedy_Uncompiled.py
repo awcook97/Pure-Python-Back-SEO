@@ -40,7 +40,7 @@ class Speedy_Uncompiled(Plugin):
         x = list()
         y = list()
         lastPrime = 0
-        for i in range(10000000):
+        for i in range(1000):
             x.append(i)
             if self.isPrime(i):
                 y.append(i)

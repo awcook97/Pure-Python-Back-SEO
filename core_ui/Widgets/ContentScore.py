@@ -255,11 +255,11 @@ class CoreContentScore:
         myArtLower = myArt.lower()
         mySplit = myArtLower.split("\n")
         if len(myArt.split(" ")) > 125:
-            txtSt = textstat(myArt)
-            self.stats = txtSt.statistics()
-            self.tarLength = self.stats["num_words"]
-            if self.stats["num_words"] > 100:
-                self.tarReadability = txtSt.coleman_liau().score
+            txtSt = textstat(myArt, merge=True)
+            self.stats = txtSt
+            self.tarLength = self.stats["words"]
+            if self.stats["words"] > 100:
+                self.tarReadability = txtSt["Coleman-Liau"]
         else:
             self.tarReadability = 21.1
             self.tarLength = len(myArt.split(" "))
