@@ -2,9 +2,13 @@
 import pytest
 import os
 import sys
+from pathlib import Path
+
+# Compute project root from this file's location
+PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 # Add project root to path to ensure imports work
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(PROJECT_ROOT))
 
 
 class TestProjectStructure:
@@ -24,7 +28,8 @@ class TestProjectStructure:
         ]
         
         for module in modules:
-            assert os.path.exists(module), f"Module {module} should exist"
+            module_path = PROJECT_ROOT / module
+            assert module_path.exists(), f"Module {module} should exist at {module_path}"
 
     def test_directories_exist(self):
         """Test that important directories exist."""
@@ -38,7 +43,8 @@ class TestProjectStructure:
         ]
         
         for directory in directories:
-            assert os.path.exists(directory), f"Directory {directory} should exist"
+            dir_path = PROJECT_ROOT / directory
+            assert dir_path.exists(), f"Directory {directory} should exist at {dir_path}"
 
     def test_config_files_exist(self):
         """Test that configuration files exist."""
@@ -51,11 +57,13 @@ class TestProjectStructure:
         ]
         
         for file in files:
-            assert os.path.exists(file), f"File {file} should exist"
+            file_path = PROJECT_ROOT / file
+            assert file_path.exists(), f"File {file} should exist at {file_path}"
 
     def test_python_version_file_content(self):
         """Test that .python-version has correct version."""
-        with open(".python-version", "r") as f:
+        version_file = PROJECT_ROOT / ".python-version"
+        with open(version_file, "r") as f:
             version = f.read().strip()
         
         # Should be pinned to Python 3.13
@@ -63,7 +71,8 @@ class TestProjectStructure:
 
     def test_shebang_lines_correct(self):
         """Test that shebang lines are correct in executable scripts."""
-        with open("BackSEOAgencies.py", "r") as f:
+        script_file = PROJECT_ROOT / "BackSEOAgencies.py"
+        with open(script_file, "r") as f:
             first_line = f.readline().strip()
         
         # Should be portable shebang

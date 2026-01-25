@@ -65,15 +65,23 @@ class TestBackSEOSettings:
         self.original_cwd = os.getcwd()
         os.chdir(self.test_dir)
         
+        # Patch user_settings_dir to use temp directory
+        self.settings_temp_dir = Path(self.test_dir) / "settings"
+        self.settings_temp_dir.mkdir(exist_ok=True)
+        
+        self.patcher = patch('BackSEOSettings.user_settings_dir', return_value=self.settings_temp_dir)
+        self.patcher.start()
+        
         yield
         
         # Clean up after test
+        self.patcher.stop()
         os.chdir(self.original_cwd)
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_settings_creates_output_directories(self):
         """Test that BackSEOSettings creates necessary output directories."""
-        settings = BackSEOSettings()
+        BackSEOSettings()
         
         # Check that output directories are created
         expected_dirs = [
