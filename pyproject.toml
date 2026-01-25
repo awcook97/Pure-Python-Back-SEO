@@ -1,7 +1,7 @@
 [project]
 name = "pure-python-back-seo"
 version = "0.1.0"
-description = "Add your description here"
+description = "A comprehensive SEO analysis and reporting tool for agencies"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -20,4 +20,11 @@ dependencies = [
     "requests>=2.32.3",
     "urllib3>=2.3.0",
     "xdialog>=1.2.0.1",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
 ]

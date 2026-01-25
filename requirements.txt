@@ -13,3 +13,8 @@ regex>=2024.11.6
 requests>=2.32.3
 urllib3>=2.3.0
 xdialog>=1.2.0.1
+
+# Testing dependencies
+pytest>=8.0.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
