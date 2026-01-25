@@ -58,8 +58,8 @@ class TestProjectStructure:
         with open(".python-version", "r") as f:
             version = f.read().strip()
         
-        # Should be 3.13 or 3.12
-        assert version in ["3.13", "3.12"], f"Python version should be 3.12 or 3.13, got {version}"
+        # Should be pinned to Python 3.13
+        assert version == "3.13", f"Python version should be 3.13, got {version}"
 
     def test_shebang_lines_correct(self):
         """Test that shebang lines are correct in executable scripts."""
