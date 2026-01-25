@@ -76,6 +76,7 @@ class TestImports:
 
     def test_import_backseo_settings(self):
         """Test that BackSEOSettings can be imported."""
+        pytest.importorskip("dearpygui", reason="dearpygui not installed")
         try:
             from BackSEOSettings import BackSEOSettings
             assert BackSEOSettings is not None
@@ -84,6 +85,7 @@ class TestImports:
 
     def test_import_backseo_datahandler(self):
         """Test that BackSEODataHandler can be imported."""
+        pytest.importorskip("dearpygui", reason="dearpygui not installed")
         try:
             from BackSEODataHandler import BackSEODataHandler
             assert BackSEODataHandler is not None
@@ -92,6 +94,7 @@ class TestImports:
 
     def test_import_plugin_controller(self):
         """Test that PluginController can be imported."""
+        pytest.importorskip("dearpygui", reason="dearpygui not installed")
         try:
             from PluginController import PluginController
             assert PluginController is not None

@@ -6,6 +6,10 @@ import tempfile
 import shutil
 from multiprocessing import Queue
 from unittest.mock import Mock, patch, MagicMock
+
+# Skip all tests if dearpygui is not installed
+pytest.importorskip("dearpygui", reason="dearpygui not installed")
+
 from BackSEODataHandler import BackSEODataHandler, getBackSEODataHandler
 
 

@@ -5,6 +5,10 @@ import tempfile
 import shutil
 from pathlib import Path
 from unittest.mock import patch, MagicMock
+
+# Skip all tests if dearpygui is not installed
+pytest.importorskip("dearpygui", reason="dearpygui not installed")
+
 from BackSEOSettings import BackSEOSettings, user_settings_dir, user_local_dir
 
 

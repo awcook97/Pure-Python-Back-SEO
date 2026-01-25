@@ -16,3 +16,14 @@ Fonts/USERSCALE
 SEO/Resources/agency
 bseodef.ini
 Fonts/USERFONT
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.tox/
+.hypothesis/
